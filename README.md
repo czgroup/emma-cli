@@ -1,6 +1,6 @@
 # emma-app-cli
 
-Command-line interface for the [Emma](https://web.emma-app.com) personal
+Command-line interface for the [Emma](https://emma-app.com/) personal
 finance app. Read your Emma budgets, transactions, spending analytics, and
 categories from the terminal — or hand it to an AI agent so it can pull your
 financial data on demand.
