@@ -1,6 +1,24 @@
 # emma-app-cli
 
-CLI for the [Emma](https://web.emma-app.com) personal finance web app.
+Command-line interface for the [Emma](https://web.emma-app.com) personal
+finance app. Read your Emma budgets, transactions, spending analytics, and
+categories from the terminal — or hand it to an AI agent so it can pull your
+financial data on demand.
+
+- Get **Emma budgets** for the current period (per-category limits, spend,
+  remaining, over-budget flags).
+- Get **Emma transactions** (list, search by merchant, full detail).
+- Get **Emma analytics** (income vs spending, budget remaining, daily
+  allowance, spending breakdown by category or merchant).
+- **Emma categories** with per-category transaction counts.
+- QR-code sign in with the Emma mobile app — no manual token setup.
+
+## Why
+
+The Emma web app and mobile app are great for browsing, but they are not
+scriptable. `emma-app-cli` is a thin, typed client for the Emma API that lets
+you (or an AI agent) query budgets and transactions from the command line, in
+CI, or from any automation that can run a Node.js script.
 
 ## Install
 
@@ -44,7 +62,29 @@ emma analytics -b merchants  # spend by merchant
 emma transactions -n 20      # recent transactions
 emma transactions -s Tesco   # search transactions
 emma transactions <id>       # transaction detail
+emma categories --counts     # categories with transaction counts
 ```
+
+## Using with an AI agent
+
+This CLI is designed to be called by AI agents and automation. It prints
+plain text to stdout, takes flags for pagination and filtering, and never
+prompts interactively except during `emma login`.
+
+Example commands an agent can run:
+
+```bash
+emma budgets                    # "What is my grocery budget this month?"
+emma analytics                  # "How much have I spent this month?"
+emma analytics -b categories    # "Where is my money going?"
+emma transactions -n 20         # "Show my 20 most recent transactions"
+emma transactions -s Tesco      # "Show me my Tesco transactions"
+emma transactions <id>          # "What is this transaction?"
+emma categories                 # "List my categories"
+```
+
+Pass a custom credentials file with `--config <path>` if the agent runs under
+a different user account.
 
 ## Commands
 
@@ -57,6 +97,7 @@ emma transactions <id>       # transaction detail
 | `emma analytics -b <categories\|merchants>` | Show spending breakdown |
 | `emma transactions` | List transactions |
 | `emma transactions <id>` | Show transaction detail |
+| `emma categories` | List transaction categories |
 
 Global option: `--config <path>` to use a different credentials file.
 
