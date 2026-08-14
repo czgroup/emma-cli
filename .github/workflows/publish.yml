@@ -7,7 +7,7 @@ on:
 
 permissions:
   id-token: write # Required for OIDC trusted publishing
-  contents: read
+  contents: write # Required to create the GitHub release
 
 jobs:
   publish:
@@ -17,7 +17,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          # Trusted publishing (OIDC) requires npm >= 11.5.1. Node 24 ships
+          # npm 11+; Node 22 still bundles npm 10, which cannot use OIDC.
+          node-version: 24
           registry-url: https://registry.npmjs.org
 
       - run: npm ci
