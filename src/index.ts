@@ -6,6 +6,7 @@ import { loadCredentials, saveCredentials, DEFAULT_CONFIG_PATH } from './config.
 import { runBudgets } from './commands/budget.js';
 import { runAnalyticsSummary, runAnalyticsBreakdown } from './commands/analytics.js';
 import { runTransactionsList, runTransactionsGet } from './commands/transactions.js';
+import { runCategories } from './commands/categories.js';
 import { runLogin } from './commands/login.js';
 
 const program = new Command();
@@ -95,6 +96,14 @@ program
         await runAnalyticsSummary(api);
       }
     })();
+  });
+
+program
+  .command('categories')
+  .description('list transaction categories')
+  .option('--counts', 'show transaction count per category', false)
+  .action(async (opts) => {
+    await handler(program.opts(), (api) => runCategories(api, opts.counts))();
   });
 
 program
