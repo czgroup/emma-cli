@@ -1,0 +1,51 @@
+{
+  "name": "emma-cli",
+  "version": "0.1.0",
+  "description": "CLI for the Emma personal finance web app",
+  "type": "module",
+  "bin": {
+    "emma": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "emma",
+    "finance",
+    "cli"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leo-petrucci/emma-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/leo-petrucci/emma-cli/issues"
+  },
+  "homepage": "https://github.com/leo-petrucci/emma-cli",
+  "author": "Leonardo Petrucci",
+  "dependencies": {
+    "commander": "^15.0.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "@types/qrcode": "^1.5.6",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "fsevents@2.3.3": true
+  }
+}
