@@ -1,17 +1,17 @@
-# emma-cli
+# emma-app-cli
 
 CLI for the [Emma](https://web.emma-app.com) personal finance web app.
 
 ## Install
 
 ```bash
-npm install -g emma-cli
+npm install -g emma-app-cli
 ```
 
 Or run without installing:
 
 ```bash
-npx emma-cli --help
+npx emma-app-cli --help
 ```
 
 Requires Node.js 18+.
