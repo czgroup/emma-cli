@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 
+import { createRequire } from 'node:module';
 import { Command } from 'commander';
+
+// Read the version from package.json so `--version` always matches the
+// installed release. createRequire resolves relative to this file, which is
+// inside the published package, so it works regardless of the cwd.
+const require = createRequire(import.meta.url);
+const pkg = require('../package.json') as { version: string };
 import { EmmaApi } from './api.js';
 import { loadCredentials, saveCredentials, DEFAULT_CONFIG_PATH } from './config.js';
 import { runBudgets } from './commands/budget.js';
@@ -14,7 +21,7 @@ const program = new Command();
 program
   .name('emma')
   .description('CLI for the Emma personal finance app')
-  .version('0.1.0')
+  .version(pkg.version)
   .option('--config <path>', 'path to credentials file', DEFAULT_CONFIG_PATH);
 
 /**
