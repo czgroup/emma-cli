@@ -1,6 +1,6 @@
 {
   "name": "emma-app-cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "CLI for the Emma personal finance web app",
   "type": "module",
   "bin": {
