@@ -16,6 +16,7 @@ import { runTransactionsList, runTransactionsGet } from './commands/transactions
 import { runCategories } from './commands/categories.js';
 import { runLogin } from './commands/login.js';
 import { runSnapshot } from './commands/snapshot.js';
+import { runBudgetWrite, runTransactionWrite } from './commands/write.js';
 
 const program = new Command();
 
@@ -139,6 +140,48 @@ program
     await handler(program.opts(), (api) => runSnapshot(api, {
       output: opts.output,
       transactionLimit: Number(opts.transactionLimit),
+    }))();
+  });
+
+program
+  .command('transaction-write')
+  .description('dry-run or apply one allowlisted transaction-field write')
+  .requiredOption('--id <id>', 'numeric transaction id')
+  .requiredOption('--field <field>', 'categoryId, labels, customName, or notes')
+  .requiredOption('--value <value>', 'new value (labels: JSON string array)')
+  .requiredOption('--expected <value>', 'required current value (labels: sorted JSON string array)')
+  .option('--apply', 'perform the write; default is dry-run', false)
+  .option('--reason <text>', 'audit reason, required with --apply')
+  .option('--audit-log <path>', 'append-only local audit log', 'emma-write-audit.jsonl')
+  .action(async (opts) => {
+    const allowed = ['categoryId', 'labels', 'customName', 'notes'];
+    if (!allowed.includes(opts.field)) throw new Error(`field must be one of: ${allowed.join(', ')}`);
+    await handler(program.opts(), (api) => runTransactionWrite(api, {
+      id: Number(opts.id), field: opts.field, value: opts.value, expected: opts.expected,
+      apply: opts.apply, reason: opts.reason, auditLog: opts.auditLog,
+    }))();
+  });
+
+program
+  .command('budget-write')
+  .description('dry-run or apply one optimistic budget write')
+  .requiredOption('--key <key>', 'existing budget key')
+  .requiredOption('--base-limit <amount>', 'new base limit')
+  .requiredOption('--expected-base-limit <amount>', 'required current base limit')
+  .requiredOption('--rollover <true|false>', 'new rollover setting')
+  .requiredOption('--expected-rollover <true|false>', 'required current rollover setting')
+  .option('--apply', 'perform the write; default is dry-run', false)
+  .option('--reason <text>', 'audit reason, required with --apply')
+  .option('--audit-log <path>', 'append-only local audit log', 'emma-write-audit.jsonl')
+  .action(async (opts) => {
+    const parseBoolean = (value: string) => {
+      if (value !== 'true' && value !== 'false') throw new Error('rollover values must be true or false');
+      return value === 'true';
+    };
+    await handler(program.opts(), (api) => runBudgetWrite(api, {
+      key: opts.key, baseLimit: Number(opts.baseLimit), expectedBaseLimit: Number(opts.expectedBaseLimit),
+      shouldRollover: parseBoolean(opts.rollover), expectedShouldRollover: parseBoolean(opts.expectedRollover),
+      apply: opts.apply, reason: opts.reason, auditLog: opts.auditLog,
     }))();
   });
 

@@ -43,6 +43,8 @@ export interface Transaction {
   realCounterpartName: string | null;
   merchant: Merchant | null;
   notes: string | null;
+  customName?: string | null;
+  labels?: string[];
   isPending: boolean;
   isRecurring: boolean;
   accountType: string;

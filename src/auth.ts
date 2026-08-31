@@ -70,5 +70,8 @@ export async function getAccessToken(creds: Credentials, configPath: string): Pr
     refresh_token: next.refresh_token,
   };
   saveCredentials(updated, configPath);
+  // Refresh tokens rotate. Keep the live client in sync as well as disk so a
+  // second request cannot retry with the now-invalid previous refresh token.
+  Object.assign(creds, updated);
   return next.access_token;
 }

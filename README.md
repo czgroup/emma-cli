@@ -121,6 +121,29 @@ version. It fails closed when core response containers change shape. This is
 an unsupported private API: keep Emma as the canonical ledger and retain Live
 Export as the supported transaction fallback.
 
+### Guarded writes (experimental)
+
+Writes are dry-run unless `--apply` is present. Every applied write requires
+an expected current value and an audit reason, then independently reads the
+record back and verifies protected transaction fields did not change.
+
+```bash
+# Plan only
+emma transaction-write --id 123 --field categoryId \
+  --expected general --value groceries
+
+# Apply after reviewing the plan
+emma transaction-write --id 123 --field categoryId \
+  --expected general --value groceries --apply \
+  --reason "Confirmed grocery transaction" \
+  --audit-log /secure/emma-write-audit.jsonl
+```
+
+Allowlisted transaction fields are `categoryId`, `labels`, `customName`, and
+`notes`. `budget-write` supports an existing budget key with optimistic checks
+for both its current base limit and rollover state. These endpoints are still
+unsupported private API contracts; do not grant unattended write authority.
+
 ## How it works
 
 - Reads the Emma private API at `https://api.emma-app.com`.

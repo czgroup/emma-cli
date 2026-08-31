@@ -40,18 +40,32 @@ export class EmmaApi {
     this.configPath = configPath;
   }
 
-  /** Perform a JSON GET and return the parsed body. */
-  async get<T>(path: string, params?: Record<string, string>, spaceId?: string): Promise<T> {
+  /** Perform a JSON request and return the parsed body. */
+  async request<T>(
+    method: 'GET' | 'POST' | 'PATCH',
+    path: string,
+    options: { params?: Record<string, string>; body?: unknown; spaceId?: string } = {},
+  ): Promise<T> {
     const token = await getAccessToken(this.creds, this.configPath);
-    const search = params ? `?${new URLSearchParams(params)}` : '';
+    const search = options.params ? `?${new URLSearchParams(options.params)}` : '';
     const res = await fetch(`${API_URL}${path}${search}`, {
-      headers: buildHeaders(token, this.creds.client_id, spaceId),
+      method,
+      headers: {
+        ...buildHeaders(token, this.creds.client_id, options.spaceId),
+        ...(options.body === undefined ? {} : { 'content-type': 'application/json' }),
+      },
+      ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
     });
     if (!res.ok) {
       const text = await res.text().catch(() => '');
       throw new Error(`${res.status} ${res.statusText}: ${text.slice(0, 300)}`);
     }
     return (await res.json()) as T;
+  }
+
+  /** Perform a JSON GET and return the parsed body. */
+  async get<T>(path: string, params?: Record<string, string>, spaceId?: string): Promise<T> {
+    return this.request<T>('GET', path, { params, spaceId });
   }
 
   /** Resolve the current space id from the `/me` payload. */
