@@ -56,15 +56,15 @@ function writeAtomic(path: string, value: unknown): void {
  * canonical ledger; the result is a drift-detectable observation snapshot.
  */
 export async function runSnapshot(api: EmmaApi, options: SnapshotOptions): Promise<void> {
-  if (!Number.isInteger(options.transactionLimit) || options.transactionLimit < 1 || options.transactionLimit > 500) {
-    throw new Error('transaction-limit must be an integer from 1 to 500');
+  if (!Number.isInteger(options.transactionLimit) || options.transactionLimit < 1 || options.transactionLimit > 10000) {
+    throw new Error('transaction-limit must be an integer from 1 to 10000');
   }
 
   const spaceId = await api.getSpaceId();
   const period = calendarMonth();
   const scoped = <T>(path: string, params?: Record<string, string>) => api.get<T>(path, params, spaceId);
 
-  const [feed, connections, budgets, totals, categoryAnalytics, categories, labels, spaces, transactions] =
+  const [feed, connections, budgets, totals, categoryAnalytics, categories, labels, spaces] =
     await Promise.all([
       scoped<unknown>('/feed'),
       scoped<unknown>('/bank-connections'),
@@ -79,8 +79,19 @@ export async function runSnapshot(api: EmmaApi, options: SnapshotOptions): Promi
       scoped<unknown>('/categories', { withTransactionsCount: 'true' }),
       scoped<unknown>('/labels'),
       api.get<unknown>('/spaces'),
-      scoped<unknown>('/transactions', { page: '1', perPage: String(options.transactionLimit) }),
     ]);
+
+  const transactionRows: unknown[] = [];
+  for (let page = 1; transactionRows.length < options.transactionLimit; page += 1) {
+    const perPage = Math.min(100, options.transactionLimit - transactionRows.length);
+    const response = await scoped<unknown>('/transactions', { page: String(page), perPage: String(perPage) });
+    assertObject('transactions', response);
+    assertArray('transactions', response, 'transactions');
+    const rows = response.transactions as unknown[];
+    transactionRows.push(...rows);
+    if (rows.length < perPage) break;
+  }
+  const transactions = { transactions: transactionRows };
 
   assertObject('budgets', budgets);
   assertArray('budgets', budgets, 'budgets');

@@ -50,7 +50,7 @@ test('snapshot fails closed when a core response changes shape', async () => {
 
 test('snapshot rejects an excessive transaction limit before API calls', async () => {
   await assert.rejects(
-    runSnapshot(fixtureApi(), { transactionLimit: 501 }),
-    /transaction-limit must be an integer from 1 to 500/,
+    runSnapshot(fixtureApi(), { transactionLimit: 10001 }),
+    /transaction-limit must be an integer from 1 to 10000/,
   );
 });
