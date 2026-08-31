@@ -15,6 +15,7 @@ import { runAnalyticsSummary, runAnalyticsBreakdown } from './commands/analytics
 import { runTransactionsList, runTransactionsGet } from './commands/transactions.js';
 import { runCategories } from './commands/categories.js';
 import { runLogin } from './commands/login.js';
+import { runSnapshot } from './commands/snapshot.js';
 
 const program = new Command();
 
@@ -57,11 +58,11 @@ function handler(globalOpts: { config: string }, run: (api: EmmaApi) => Promise<
 program
   .command('login')
   .description('sign in by scanning a QR code with the Emma app')
-  .option('--config <path>', 'path to credentials file', DEFAULT_CONFIG_PATH)
+  .option('--config <path>', 'path to credentials file (overrides global --config)')
   .option('--qr-image <path>', 'write the QR code to a PNG file instead of the terminal')
   .action(async (opts) => {
     try {
-      await runLogin(opts.config, opts.qrImage);
+      await runLogin(opts.config ?? program.opts().config, opts.qrImage);
     } catch (err) {
       process.stderr.write(`Error: ${err instanceof Error ? err.message : String(err)}\n`);
       process.exit(1);
@@ -75,15 +76,16 @@ program
   .requiredOption('--client-id <id>', 'OAuth client id (matches emma-client-id header)')
   .requiredOption('--access-token <jwt>', 'short-lived access token')
   .requiredOption('--refresh-token <jwt>', 'long-lived refresh token')
-  .option('--config <path>', 'path to credentials file', DEFAULT_CONFIG_PATH)
+  .option('--config <path>', 'path to credentials file (overrides global --config)')
   .action(async (opts) => {
     const creds = {
       client_id: opts.clientId,
       access_token: opts.accessToken,
       refresh_token: opts.refreshToken,
     };
-    saveCredentials(creds, opts.config);
-    process.stdout.write(`Credentials saved to ${opts.config}\n`);
+    const configPath = opts.config ?? program.opts().config;
+    saveCredentials(creds, configPath);
+    process.stdout.write(`Credentials saved to ${configPath}\n`);
   });
 
 program
@@ -126,6 +128,18 @@ program
         ? runTransactionsGet(api, id)
         : runTransactionsList(api, parseInt(opts.page, 10), parseInt(opts.perPage, 10), opts.search),
     )();
+  });
+
+program
+  .command('snapshot')
+  .description('fetch a read-only JSON snapshot for automation')
+  .option('-o, --output <path>', 'atomically write JSON to this path (mode 0600)')
+  .option('--transaction-limit <n>', 'number of recent rich transactions to include', '100')
+  .action(async (opts) => {
+    await handler(program.opts(), (api) => runSnapshot(api, {
+      output: opts.output,
+      transactionLimit: Number(opts.transactionLimit),
+    }))();
   });
 
 program.parseAsync();

@@ -63,6 +63,7 @@ emma transactions -n 20      # recent transactions
 emma transactions -s Tesco   # search transactions
 emma transactions <id>       # transaction detail
 emma categories --counts     # categories with transaction counts
+emma snapshot -o state.json  # atomic read-only automation snapshot
 ```
 
 ## Using with an AI agent
@@ -98,8 +99,27 @@ a different user account.
 | `emma transactions` | List transactions |
 | `emma transactions <id>` | Show transaction detail |
 | `emma categories` | List transaction categories |
+| `emma snapshot` | JSON snapshot of private-API fields absent from Live Export |
 
 Global option: `--config <path>` to use a different credentials file.
+
+### Persistent read-only integration
+
+`emma snapshot` is the machine-oriented interface. It uses GET requests only
+and collects current budgets, month analytics, categories, the feed/net-worth
+overview, bank-connection health, labels, spaces, and recent rich transaction
+metadata. Use `--output` for an atomic mode-0600 file suitable for a scheduler:
+
+```bash
+emma --config /secure/emma.json snapshot \
+  --output /var/lib/emma/private-api-latest.json \
+  --transaction-limit 200
+```
+
+The snapshot includes capture time, period, source type, space id, and schema
+version. It fails closed when core response containers change shape. This is
+an unsupported private API: keep Emma as the canonical ledger and retain Live
+Export as the supported transaction fallback.
 
 ## How it works
 
