@@ -33,6 +33,11 @@ function transactionValue(transaction: Transaction, field: Field): string {
 }
 
 function requestedValue(field: Field, value: string): string | string[] {
+  // The current web client has no true clear contract: it resets the display
+  // by writing counterpartName. Empty string and null are ignored by the API.
+  if (field === 'customName' && value === '') {
+    throw new Error('customName cannot be empty; true clear semantics are not supported');
+  }
   if (field !== 'labels') return value;
   const parsed = JSON.parse(value) as unknown;
   if (!Array.isArray(parsed) || !parsed.every((item) => typeof item === 'string')) {

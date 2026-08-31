@@ -143,6 +143,8 @@ Allowlisted transaction fields are `categoryId`, `labels`, `customName`, and
 `notes`. `budget-write` supports an existing budget key with optimistic checks
 for both its current base limit and rollover state. These endpoints are still
 unsupported private API contracts; do not grant unattended write authority.
+The API ignores empty/null custom names, so true custom-name clearing is
+deliberately rejected; reset to the original counterpart name instead.
 
 ## How it works
 

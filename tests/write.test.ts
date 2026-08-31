@@ -60,3 +60,14 @@ test('transaction write stops on a stale precondition without audit or mutation'
   assert.equal(wrote, false);
   assert.equal(existsSync(auditLog), false);
 });
+
+test('transaction write rejects unsupported custom-name clearing', async () => {
+  const api = { get: async () => transaction() } as unknown as EmmaApi;
+  await assert.rejects(
+    runTransactionWrite(api, {
+      id: 7, field: 'customName', value: '', expected: '', apply: false,
+      auditLog: join(tmpdir(), 'unused-emma-audit.jsonl'),
+    }),
+    /true clear semantics are not supported/,
+  );
+});
